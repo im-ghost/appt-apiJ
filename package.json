@@ -1,0 +1,10 @@
+{
+  "name": "appt_api",
+  "version": "1.0.0",
+  "description": "An API for booking appointments",
+  "main": "server.js",
+  "repository": "https://github.com/im-ghost/appt-apiJ.git",
+  "author": "Ghost <culestfrosh@gmail.com>",
+  "license": "MIT",
+  "private": true
+}
