@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 const User = require('../models/User.js')
+const Appointment = require('../models/Appointment.js')
 require("dotenv").config()
 // Generate JWT
 const generateToken = (id) => {
@@ -46,8 +47,23 @@ const protectMe =(req,res,next) =>{
       throw new Error('Not authorized')
     }
 }
+const protectAppointment =(req,res,next) =>{
+  const appointmentId = req.params.id;
+  const userId = req.user._id;
+  const appointment = Appointment.findById(appointmentId)
+    if(userId === appointment.userId){
+      console.log("correct user ")
+        next()
+    }else{
+        
+      console.log(error)
+      res.status(401)
+      throw new Error('Not authorized')
+    }
+}
 module.exports = {
     generateToken,
     protect,
-    protectMe
+    protectMe,
+    protectAppointment
 }
