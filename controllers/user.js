@@ -116,6 +116,35 @@ for (const attr in user) {
     throw new Error('User not found')
   }
 }
+const addUserApppointment = async (user, appointment._id) => {
+
+  if (user) {
+    
+    const userAppt = user.appointments;
+    userAppt.push(appointmentId)
+    user.appointments = userAppt
+    const updatedUser = await user.save()
+
+    res.json(updatedUser)
+  } else {
+    res.status(404)
+    throw new Error('User not found')
+  }
+}
+const addDoctorAppointment = async (doctor,appointmentId) => {
+const user = doctor
+  if (doctor) {
+    const doctorsAppt = doctor.appointments;
+    doctorsAppt.push(appointmentId)
+    doctor.appointments = doctorsAppt
+    const updatedDoctor = await doctor.save()
+
+    res.json(updatedDoctor)
+  } else {
+    res.status(404)
+    throw new Error('User not found')
+  }
+}
 
 module.exports = {
   authUser,
@@ -124,4 +153,6 @@ module.exports = {
   deleteUser,
   getUserById,
   updateUser,
+  addUserApppointment,
+  addDoctorAppointment
 }
