@@ -19,10 +19,14 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    quizes:{
+    appointments:{
       type:Array,
       default:[]
     
+    },
+    isDoctor:{
+      type:Boolean,
+      default:false
     }
   },
   {
