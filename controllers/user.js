@@ -116,7 +116,7 @@ for (const attr in user) {
     throw new Error('User not found')
   }
 }
-const addUserApppointment = async (user, appointment._id) => {
+const addUserApppointment = async (user, appointmentId) => {
 
   if (user) {
     

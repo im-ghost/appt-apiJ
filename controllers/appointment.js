@@ -54,6 +54,7 @@ const getAppointmentById = (req,res,next) =>{
     throw new Error("Appointment not found ")
   
 }
+}
 const getUserAppointments = (req,res,next) =>{
     const doctor = User.findById(req.params.id);
   if(doctor){
@@ -61,6 +62,7 @@ const getUserAppointments = (req,res,next) =>{
   }else{
     throw new Error("User not found ")
   
+}
 }
 const deleteAppointment = async (req,res,next) =>{ 
   const appointment = await Appointment.findById(req.params.id)
@@ -72,7 +74,7 @@ const deleteAppointment = async (req,res,next) =>{
     res.status(404)
     throw new Error(' Appointment not found')
   }}
-const updateAppointment = (req,res,next) =>{
+const updateAppointment = async (req,res,next) =>{
   const appointment = await Appointment.findById(req.params.id)
 
   if (appointment) {

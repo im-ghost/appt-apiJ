@@ -7,7 +7,7 @@ const {
   deleteAppointment,
   getAppointmentById,
   updateAppointment,
-} = require("../controllers/appointments");
+} = require("../controllers/appointment");
 const {
   protect,
   protectAppointment
