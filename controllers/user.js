@@ -5,6 +5,29 @@ const User = require('../models/User.js');
 // @desc    Auth user & get token
 // @route   POST /api/users/login
 // @access  Public
+
+/*const doctorAvailable = async (doctorId, appointmentTime)=>{
+  const milliSecsInADay = 100*60*60*24;
+  const appointmentDateInM = appointmentTime - milliSecsInADay;
+  
+  
+  const { appointments } = await User.findById(doctorId);
+  const times= []
+  for async (const appt in appointments){
+    const { time } = await Appointment.findById(appt);
+    if((time - appointmentDateInM ) < milliSecsInADay){
+      
+    times.push(time)
+    }
+  }
+  for async (const time in times ){
+    if((appointmentTime - time) < (/*2 hours2*60*60*100)){
+      // Doctor is booked;
+      const returnValues = [true]
+      return 
+    }
+  }
+}*/
 const authUser = async (req, res) => {
   const { email, password } = req.body
 console.log(req.body)
@@ -16,7 +39,7 @@ console.log(req.body)
       _id: user._id,
       name: user.name,
       email: user.email,
-      quizes: user.quizes,
+      appointments: user.appointments,
       token: generateToken(user._id),
     })
   }
@@ -45,7 +68,8 @@ console.log(req.body)
   const user = await User.create({
     name:name,
     email:email,
-    password: password
+    password: password,
+    appointments:[]
   })
 
   if (user) {
@@ -53,7 +77,7 @@ console.log(req.body)
       _id: user._id,
       name: user.name,
       email: user.email,
-      quizes: user.quizes,
+      appointments: user.appointments,
       token: generateToken(user._id),
     })
   } else {
@@ -116,10 +140,15 @@ for (const attr in user) {
     throw new Error('User not found')
   }
 }
-const addUserApppointment = async (user, appointmentId) => {
+const addUserApppointment = async (user, appointmentId,appointmentTime) => {
 
   if (user) {
     
+    for (const appointment in user.appointments){
+      if(appointment.time === appointmentTime){
+        res.status(201).json({message:"The User has an appointment by this time"})
+      }
+    }
     const userAppt = user.appointments;
     userAppt.push(appointmentId)
     user.appointments = userAppt
@@ -131,10 +160,15 @@ const addUserApppointment = async (user, appointmentId) => {
     throw new Error('User not found')
   }
 }
-const addDoctorAppointment = async (doctor,appointmentId) => {
+const addDoctorAppointment = async (doctor,appointmentId,appointmentTime) => {
 const user = doctor
   if (doctor) {
     const doctorsAppt = doctor.appointments;
+    for (const appointment in doctor.appointments){
+      if(appointment.time === appointmentTime){
+        res.status(201).json({message:"The Doctor has an appointment by this time"})
+      }
+    }
     doctorsAppt.push(appointmentId)
     doctor.appointments = doctorsAppt
     const updatedDoctor = await doctor.save()
