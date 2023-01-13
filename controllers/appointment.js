@@ -31,8 +31,8 @@ const createAppointment = async (req,res,next) =>{
   }
   if(appointment){
     
-    await addDoctorAppointment(doctor,appointment._id);
-   await addUserApppointment(user,appointment._id)
+    await addDoctorAppointment(doctor,appointment._id,appointment.time);
+   await addUserApppointment(user,appointment._id,appointment.time)
   res.status(200).json({appointment:appointment})
   }else{
     throw new Error("Error")
