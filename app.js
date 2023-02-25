@@ -10,14 +10,14 @@ const usersRouter = require('./routes/users');
 const indexRouter = require('./routes/index');
 const apptRouter = require('./routes/appointment');
 
-const app = express();/*
+const app = express();
 const {
   connectDB
 } = require("./config/db")
 connectDB()
-*/
+
 app.use(cors({
-  origin:"http://localhost:5173"
+  origin:"http://localhost:3000"
  })) 
 app.use(logger('dev'));
 app.use(express.json());
