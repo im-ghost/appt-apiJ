@@ -34,6 +34,7 @@ console.log(req.body)
   const user = await User.findOne({ email })
 
   if (user){
+    console.log(user)
      if(await user.matchPassword(password)) {
     res.json({
       _id: user._id,
@@ -44,10 +45,10 @@ console.log(req.body)
     })
   }
   else{
-    res.status(401).json({"error":"wrong passwod"})
+    res.status(400).json({"error":"Wrong password "})
   }
 } else {
-    res.status(401).json({"error":"invalid email"})
+    res.status(400).json({"error":"Wrong email "})
   }
 }
 
@@ -61,8 +62,7 @@ console.log(req.body)
   const userExists = await User.findOne({ email })
 
   if (userExists) {
-    res.status(400)
-    throw new Error('User already exists')
+    res.status(400).json({'error':'User already exists'})
   }
 
   const user = await User.create({
@@ -81,8 +81,7 @@ console.log(req.body)
       token: generateToken(user._id),
     })
   } else {
-    res.status(400)
-    throw new Error('Invalid user data')
+    res.status(400).json({'error':'Invalid user data'})
   }
 }
 // @desc    Get all users
