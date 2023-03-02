@@ -17,20 +17,22 @@ const protect = async (req, res, next) => {
     try {
       // Get token from header
       token = req.headers.authorization
-
+ //    console.log(token)
       // Verify token
       const decoded = jwt.verify(token, process.env.SECRET)
       // Get user from the token
       req.user = await User.findById(decoded.id).select('-password')
-
+    // console.log(req.user)
       next()
     } catch (error) {
+      console.log("Nit authorized ")
       console.log(error)
       res.status(401).json({"mes":"not authorized"})
     }
   }
 
   if (!token) {
+    console.log("No token")
     res.status(401).json({"mes":"no token"})
   }
 }
