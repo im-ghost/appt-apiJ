@@ -27,7 +27,41 @@ const userSchema = mongoose.Schema(
     isDoctor:{
       type:Boolean,
       default:false
+    },
+    specialties:{
+      type: Array,
+      default: []
+    },
+    reviews: [{
+    reviewer: {
+      type: String,
+      required: true
+    },
+    rating: {
+      type: Number,
+      min: 1,
+      max: 5,
+      required: true
+    },
+    comment: {
+      type: String
     }
+  }],
+ timeSlots: [{
+    startTime: {
+      type: Date,
+      required: true
+    },
+    endTime: {
+      type: Date,
+      required: true
+    },
+    available: {
+      type: Boolean,
+      required: true,
+      default: true
+    }
+  }]
   },
   {
     timestamps: true,
