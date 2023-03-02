@@ -2,7 +2,7 @@ const User = require("../models/User.js")
 const Appointment = require("../models/Appointment.js")
 const {
   addUserApppointment,
-  addDoctorAppointment
+  addDoctorAppointment,
 } = require("../controllers/user.js")
 const createAppointment = async (req,res,next) =>{
   const {
