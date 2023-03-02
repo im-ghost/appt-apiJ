@@ -2,32 +2,29 @@ const {
   generateToken
 } = require("../middlewares/auth.middleware")
 const User = require('../models/User.js');
-// @desc    Auth user & get token
-// @route   POST /api/users/login
-// @access  Public
 
-/*const doctorAvailable = async (doctorId, appointmentTime)=>{
-  const milliSecsInADay = 100*60*60*24;
-  const appointmentDateInM = appointmentTime - milliSecsInADay;
-  
-  
-  const { appointments } = await User.findById(doctorId);
-  const times= []
-  for async (const appt in appointments){
-    const { time } = await Appointment.findById(appt);
-    if((time - appointmentDateInM ) < milliSecsInADay){
-      
-    times.push(time)
-    }
+const checkAvailableDoctorSlots = async (req,res)=>{
+// Return all available time slots for a doctor
+User.findOne({ name: req.body._id }, (err, doctor) => {
+  if (err) {
+    console.log(err);
+    return;
   }
-  for async (const time in times ){
-    if((appointmentTime - time) < (/*2 hours2*60*60*100)){
-      // Doctor is booked;
-      const returnValues = [true]
-      return 
-    }
+
+  if (!doctor) {
+    res.status(500).json({"error":'Doctor not found'});
   }
-}*/
+
+  const availableTimeSlots = doctor.timeSlots.filter((timeSlot) => {
+    return timeSlot.available === true;
+  });
+
+  res.status(200).json({'Available time slots  ' : availableTimeSlots});
+});
+
+
+  }
+
 const authUser = async (req, res) => {
   const { email, password } = req.body
 console.log(req.body)
@@ -57,7 +54,13 @@ console.log(req.body)
 // @access  Public
 const registerUser = async (req, res) => {
   
-  const { name, email, password } = req.body
+  const { name,
+  email,
+  password ,
+  specialties,
+  isDoctor,
+  availableTimeSlots
+  } = req.body
 console.log(req.body)
   const userExists = await User.findOne({ email })
 
@@ -69,7 +72,11 @@ console.log(req.body)
     name:name,
     email:email,
     password: password,
-    appointments:[]
+    appointments:[],
+    specialties :specialties,
+    isDoctor : isDoctor,
+   availableTimeSlots : availableTimeSlots,
+    reviews:[]
   })
 
   if (user) {
@@ -78,7 +85,11 @@ console.log(req.body)
       name: user.name,
       email: user.email,
       appointments: user.appointments,
+      specialties: user.specialties,
+      isDoctor:user.isDoctor,
       token: generateToken(user._id),
+     availableTimeSlots : user.availableTimeSlots,
+      reviews: user.reviews
     })
   } else {
     res.status(400).json({'error':'Invalid user data'})
@@ -88,7 +99,8 @@ console.log(req.body)
 // @route   GET /api/user
 const getUsers = async (req, res) => {
   const users = await User.find({})
-  res.json(users)
+  console.log(users)
+  res.status(200).json(users)
 }
 
 // @desc    Delete user
@@ -160,14 +172,8 @@ const addUserApppointment = async (user, appointmentId,appointmentTime) => {
   }
 }
 const addDoctorAppointment = async (doctor,appointmentId,appointmentTime) => {
-const user = doctor
   if (doctor) {
     const doctorsAppt = doctor.appointments;
-    for (const appointment in doctor.appointments){
-      if(appointment.time === appointmentTime){
-        res.status(201).json({message:"The Doctor has an appointment by this time"})
-      }
-    }
     doctorsAppt.push(appointmentId)
     doctor.appointments = doctorsAppt
     const updatedDoctor = await doctor.save()
@@ -175,7 +181,7 @@ const user = doctor
     res.json(updatedDoctor)
   } else {
     res.status(404)
-    throw new Error('User not found')
+    throw new Error('Doctor not found')
   }
 }
 
@@ -187,5 +193,6 @@ module.exports = {
   getUserById,
   updateUser,
   addUserApppointment,
-  addDoctorAppointment
+  addDoctorAppointment,
+  checkAvailableDoctorSlots
 }
