@@ -5,7 +5,7 @@ const User = require('../models/User.js');
 
 const checkAvailableDoctorSlots = async (req,res)=>{
 // Return all available time slots for a doctor
-User.findOne({ name: req.body._id }, (err, doctor) => {
+User.findOne({ _id: req.params.id }, (err, doctor) => {
   if (err) {
     console.log(err);
     return;
@@ -67,7 +67,7 @@ console.log(req.body)
   if (userExists) {
     res.status(400).json({'error':'User already exists'})
   }
-
+  
   const user = await User.create({
     name:name,
     email:email,
@@ -75,7 +75,18 @@ console.log(req.body)
     appointments:[],
     specialties :specialties,
     isDoctor : isDoctor,
-   availableTimeSlots : availableTimeSlots,
+   timeSlots : ()=>{
+     const slots = [];
+     for(i=0;i<=7;i++){
+       for(j=0;j<=(24*20);j+=30){
+         slots.push({
+           start:Date.now()+ j,
+           end: Date.now() + 2*j,
+           available:true
+        })
+       }
+     }
+   },
     reviews:[]
   })
 
