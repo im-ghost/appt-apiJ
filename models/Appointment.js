@@ -15,7 +15,7 @@ const apptSchema = mongoose.Schema(
       type:String,
       required:true
     },
-    time: {
+    date: {
       type: Date,
       required: true,
     }
