@@ -47,21 +47,10 @@ const userSchema = mongoose.Schema(
       type: String
     }
   }],
- timeSlots: [{
-    startTime: {
-      type: Date,
-      required: true
-    },
-    endTime: {
-      type: Date,
-      required: true
-    },
-    available: {
-      type: Boolean,
-      required: true,
-      default: true
+    availability: {
+       type: [String],
+       required: true
     }
-  }]
   },
   {
     timestamps: true,
