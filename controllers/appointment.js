@@ -5,37 +5,47 @@ const {
   addDoctorAppointment,
 } = require("../controllers/user.js")
 const createAppointment = async (req,res,next) =>{
-  const {
-    name,
-    userId,
-    doctorId,
-    time
-  } = req.body;
-  if(!name|| !userId || !doctorId || !time){
-    throw new Error("All fields are required")
-  }
-  const appointment = Appointment.create({
-    name,
-    userId,
-    doctorId,
-    time
-  })
-  const doctor = User.findById(doctorId)
-  const user = User.findById(userId)
- 
-  if(!user){
-    throw new Error("User not found ")
-  }
-  if(!doctor){
-    throw new Error("Doctor not found")
-  }
-  if(appointment){
-    
-    await addDoctorAppointment(doctor,appointment._id,appointment.time);
+  const { doctorId, appointmentDate , userId , name} = req.body;
+
+  try {
+    // Check if the doctor exists
+    const doctor = await User.findById(doctorId);
+    if (!doctor) {
+      return res.status(404).json({ message: 'Doctor not found' });
+    }
+
+    // Check if the doctor is available on the given date
+    const availableTimeSlots = doctor.availability;
+    const isAvailable = availableTimeSlots.some((timeSlot) => {
+      return timeSlot.date === appointmentDate && timeSlot.available === true;
+    });
+    if (!isAvailable) {
+      return res.status(400).json({ message: 'Doctor is not available on the given date' });
+    }
+// Create the appointment
+    const appointment = new Appointment({
+      doctor: doctorId,
+      date: appointmentDate,
+      userId: userId,
+      name:name
+    });
+    await appointment.save();
+
+    // Update the doctor's availability
+    const updatedTimeSlots = availableTimeSlots.map((timeSlot) => {
+      if (timeSlot.date === appointmentDate) {
+        timeSlot.available = false;
+      }
+      return timeSlot;
+    });
+    doctor.availability = updatedTimeSlots;
+    await doctor.save();
+   await addDoctorAppointment(doctor,appointment._id,appointment.time);
    await addUserApppointment(user,appointment._id,appointment.time)
-  res.status(200).json({appointment:appointment})
-  }else{
-    throw new Error("Error")
+    res.status(200).json({ message: 'Appointment created successfully' ,appointment:appointment});
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'An error occurred while creating the appointment' });
   }
 }
 const getDoctorAppointments = (req,res,next) =>{
