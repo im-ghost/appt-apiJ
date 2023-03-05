@@ -47,10 +47,22 @@ const userSchema = mongoose.Schema(
       type: String
     }
   }],
-    availability: {
-       type: [String],
-       required: true
-    }
+    availability: [
+    {
+      dayOfWeek: {
+        type: Number,
+        required: true,
+      },
+      startTime: {
+        type: String,
+        required: true,
+      },
+      endTime: {
+        type: String,
+        required: true,
+      },
+    },
+  ],
   },
   {
     timestamps: true,
