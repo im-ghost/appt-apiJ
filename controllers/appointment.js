@@ -13,15 +13,13 @@ const createAppointment = async (req,res,next) =>{
     if (!doctor) {
       return res.status(404).json({ message: 'Doctor not found' });
     }
+const existingAppointment = await Appointment.findOne({ doctor: doctor._id, startTime: appointmentDate });
 
-    // Check if the doctor is available on the given date
-    const availableTimeSlots = doctor.availability;
-    const isAvailable = availableTimeSlots.some((timeSlot) => {
-      return timeSlot.date === appointmentDate && timeSlot.available === true;
-    });
-    if (!isAvailable) {
-      return res.status(400).json({ message: 'Doctor is not available on the given date' });
-    }
+if (existingAppointment) {
+  // The selected time slot is not available, throw an error or handle it in some way
+  throw new Error('The selected time slot is not available');
+}
+
 // Create the appointment
     const appointment = new Appointment({
       doctor: doctorId,

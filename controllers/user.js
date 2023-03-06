@@ -2,6 +2,7 @@ const {
   generateToken
 } = require("../middlewares/auth.middleware")
 const User = require('../models/User.js');
+const moment = require("moment");
 
 const checkAvailableDoctorSlots = async (req,res)=>{
 // Return all available time slots for a doctor
@@ -14,16 +15,30 @@ User.findOne({ _id: req.params.id }, (err, doctor) => {
   if (!doctor) {
     res.status(500).json({"error":'Doctor not found'});
   }
+  const startDate = moment().startOf('week'); // start of current week
+const endDate = moment().endOf('week'); // end of current week
+const availableSlots = [];
 
-  const availableTimeSlots = doctor.timeSlots.filter((timeSlot) => {
-    return timeSlot.available === true;
-  });
+// Loop through each day of the week
+for (let date = startDate.clone(); date.isBefore(endDate); date.add(1, 'day')) {
+  const dayOfWeek = date.isoWeekday();
+  const dayAvailability = doctor.availability.find((slot) => slot.dayOfWeek === dayOfWeek);
 
-  res.status(200).json({'Available time slots  ' : availableTimeSlots});
-});
+  // If the doctor is available on this day, create time slots
+  if (dayAvailability) {
+    const startTime = moment(`${date.format('YYYY-MM-DD')} ${dayAvailability.startTime}`, 'YYYY-MM-DD HH:mm');
+    const endTime = moment(`${date.format('YYYY-MM-DD')} ${dayAvailability.endTime}`, 'YYYY-MM-DD HH:mm');
+    let slotTime = startTime.clone();
 
-
+    while (slotTime.isBefore(endTime)) {
+      availableSlots.push(slotTime.format('YYYY-MM-DDTHH:mm:ss'));
+      slotTime.add(30, 'minutes');
+    }
   }
+   }
+   res.status(201).json({slots:availableSlots})
+  })
+}
 
 const authUser = async (req, res) => {
   const { email, password } = req.body
@@ -48,10 +63,6 @@ console.log(req.body)
     res.status(400).json({"error":"Wrong email "})
   }
 }
-
-// @desc    Register a new user
-// @route   POST /api/users
-// @access  Public
 const registerUser = async (req, res) => {
   
   const { name,
@@ -59,7 +70,7 @@ const registerUser = async (req, res) => {
   password ,
   specialties,
   isDoctor,
-  availableTimeSlots
+  availability
   } = req.body
 console.log(req.body)
   const userExists = await User.findOne({ email })
@@ -67,7 +78,17 @@ console.log(req.body)
   if (userExists) {
     res.status(400).json({'error':'User already exists'})
   }
-  
+   const days = availability;
+        const daysArray = days.split(",");
+        const pay = []
+        for(day of daysArray){
+          const d = {
+            dayOfTheWeek:day.split(-)[0],
+            startTime:day.split(-)[1],
+            endTime:day.split(-)[2],
+          }
+          pay.push(d)
+        }
   const user = await User.create({
     name:name,
     email:email,
@@ -75,18 +96,7 @@ console.log(req.body)
     appointments:[],
     specialties :specialties,
     isDoctor : isDoctor,
-   timeSlots : ()=>{
-     const slots = [];
-     for(i=0;i<=7;i++){
-       for(j=0;j<=(24*20);j+=30){
-         slots.push({
-           start:Date.now()+ j,
-           end: Date.now() + 2*j,
-           available:true
-        })
-       }
-     }
-   },
+    availability: pay
     reviews:[]
   })
 
@@ -99,24 +109,18 @@ console.log(req.body)
       specialties: user.specialties,
       isDoctor:user.isDoctor,
       token: generateToken(user._id),
-     availableTimeSlots : user.availableTimeSlots,
+     availability : user.availability,
       reviews: user.reviews
     })
   } else {
     res.status(400).json({'error':'Invalid user data'})
   }
 }
-// @desc    Get all users
-// @route   GET /api/user
 const getUsers = async (req, res) => {
   const users = await User.find({})
   console.log(users)
   res.status(200).json(users)
 }
-
-// @desc    Delete user
-// @route   DELETE /api/users/:id
-// @access  Private/Admin
 const deleteUser = async (req, res) => {
   const user = await User.findById(req.params.id)
 
@@ -129,9 +133,6 @@ const deleteUser = async (req, res) => {
   }
 }
 
-// @desc    Get user by ID
-// @route   GET /api/users/:id
-// @access  Private/Admin
 const getUserById = async (req, res) => {
   const user = await User.findById(req.params.id).select('-password')
 
@@ -142,10 +143,6 @@ const getUserById = async (req, res) => {
     throw new Error('User not found')
   }
 }
-
-// @desc    Update user
-// @route   PUT /api/users/:id
-// @access  Private/Admin
 const updateUser = async (req, res) => {
   const user = await User.findById(req.params.id)
 
